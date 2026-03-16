@@ -104,7 +104,10 @@ background:#e60073;
 
 <body>
 
-<h1>Villa-Real Closet</h1>
+<h1>VRC Thrift Shop</h1>
+<p style="text-align:center;color:#888;margin-top:-20px;">
+Unique second-hand fashion
+</p>
 
 <div class="controls">
 
@@ -212,21 +215,21 @@ catalog.innerHTML+=`
 
 <img src="${i.photo}">
 
+<div class="card-content">
+
 <h3>${i.brand}</h3>
 
-<p>${i.category}</p>
+<p>${i.category} • Size ${i.size}</p>
 
-<p>Size: ${i.size}</p>
-
-<p>$${i.price}</p>
+<p class="price">$${i.price}</p>
 
 ${sold?'<span class="badge">SOLD</span>':""}
-
-<br><br>
 
 <button onclick="buy('${i.id}')">
 Buy on WhatsApp
 </button>
+
+</div>
 
 </div>
 
