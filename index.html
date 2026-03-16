@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Victor Thrift Shop</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f6f6f6;
+margin:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+border-radius:10px;
+padding:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+img{
+width:100%;
+border-radius:8px;
+}
+
+.badge{
+color:white;
+background:red;
+padding:3px 6px;
+font-size:12px;
+border-radius:5px;
+}
+
+button{
+background:#25D366;
+color:white;
+border:none;
+padding:8px;
+border-radius:5px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Victor Thrift Shop</h1>
+
+<div class="controls">
+
+<input id="search" placeholder="Search brand or category">
+
+<select id="categoryFilter">
+<option value="">All Categories</option>
+</select>
+
+<select id="sizeFilter">
+<option value="">All Sizes</option>
+</select>
+
+<label>
+<input type="checkbox" id="availableOnly">
+Available Only
+</label>
+
+</div>
+
+<div class="grid" id="catalog"></div>
+
+<script>
+
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQKOtC5hTKrATFgDthA4Q6wA_AvjctvFoClB9uhS94sU21VZBeiIU4Ed4ZzvZTYVPj1yrqNx-ue8vDV/pub?gid=0&single=true&output=csv";
+const phone = "50766729627";
+
+let items = [];
+
+fetch(sheetURL)
+.then(res=>res.text())
+.then(data=>{
+
+const rows=data.split("\n").slice(1);
+
+rows.forEach(r=>{
+const c=r.split(",");
+
+items.push({
+id:c[0],
+category:c[1],
+brand:c[2],
+size:c[3],
+price:c[4],
+condition:c[5],
+photo:c[6],
+status:c[7]
+})
+
+})
+
+populateFilters()
+render()
+
+})
+
+function populateFilters(){
+
+const catSet=new Set()
+const sizeSet=new Set()
+
+items.forEach(i=>{
+catSet.add(i.category)
+sizeSet.add(i.size)
+})
+
+catSet.forEach(c=>{
+categoryFilter.innerHTML+=`<option>${c}</option>`
+})
+
+sizeSet.forEach(s=>{
+sizeFilter.innerHTML+=`<option>${s}</option>`
+})
+
+}
+
+function render(){
+
+const search=searchInput.value?.toLowerCase()||""
+
+const cat=categoryFilter.value
+const size=sizeFilter.value
+const available=availableOnly.checked
+
+catalog.innerHTML=""
+
+items
+.filter(i=>{
+
+if(search && !(i.brand+i.category).toLowerCase().includes(search)) return false
+if(cat && i.category!=cat) return false
+if(size && i.size!=size) return false
+if(available && i.status!="Available") return false
+
+return true
+
+})
+.forEach(i=>{
+
+const sold=i.status!="Available"
+
+catalog.innerHTML+=`
+
+<div class="card">
+
+<img src="${i.photo}">
+
+<h3>${i.brand}</h3>
+
+<p>${i.category}</p>
+
+<p>Size: ${i.size}</p>
+
+<p>$${i.price}</p>
+
+${sold?'<span class="badge">SOLD</span>':""}
+
+<br><br>
+
+<button onclick="buy('${i.id}')">
+Buy on WhatsApp
+</button>
+
+</div>
+
+`
+
+})
+
+}
+
+function buy(id){
+
+const msg=`I want item ${id}`
+window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
+
+}
+
+const searchInput=document.getElementById("search")
+const categoryFilter=document.getElementById("categoryFilter")
+const sizeFilter=document.getElementById("sizeFilter")
+const availableOnly=document.getElementById("availableOnly")
+const catalog=document.getElementById("catalog")
+
+searchInput.oninput=render
+categoryFilter.onchange=render
+sizeFilter.onchange=render
+availableOnly.onchange=render
+
+</script>
+
+</body>
+</html>
